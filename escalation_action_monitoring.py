@@ -50,7 +50,9 @@ try:
 		
 		str.append(companyset);
 		str.append('\t');
-		str.append(changetimeString);
+		
+		#str.append(changetimeString);
+		str.append(date);
 		str.append('\n');
 	rs1.close();
 	
