@@ -37,7 +37,7 @@ except	 Exception, e:
 	print "Error on report output to folder processing...."
 finally:
 	cursor = con.cursor();
-	cursor.execute ("update reportoutputcnt set isStored = (?) where jobnum = (?) ",("1",jobNumber)) ;
+	cursor.execute ("update reportoutputcnt set isstored = 1 where jobnum = (?) ",(jobNumber)) ;
 	cursor.commit();	 
 	s.close();
 	
