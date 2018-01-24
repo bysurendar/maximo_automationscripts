@@ -15,8 +15,22 @@ currentMbo = currentSet.getMbo(0);
 con = currentMbo.getMboServer().getDBConnection(userInfo.getConnectionKey());
 
 # ' is not acceptable as part of String. it is included in Backlash \ in List and converted to String
-reportListQuery = ['select jobnum,filename, filetype, content, isStored from reportoutputcnt where isStored = 0'];
+reportListQuery = ['select jobnum,filename, filetype, content, isstored from reportoutputcnt where isStored = 0'];
 reportListQuery = ''.join(reportListQuery);
+
+configData = MXServer.getMXServer().getConfig();
+outputFilePath = configData.getProperty("custom.rptooutputfolder");
+
+def storeFileFromBlob (contentInBytes, filePath):
+	try: 
+		print 'File Abs Name - ' + filePath
+		fileGen = open(filePath,'wb') ;
+		fileGen.write( contentInBytes ) ;
+		fileGen.close() ;
+	except Exception, e1:
+		print "Error on file processing..."
+	finally:
+		fileGen.close() ;
 
 try:
 	s = con.createStatement();
@@ -28,10 +42,14 @@ try:
 		fileType = rs1.getString('filetype');
 		content = rs1.getBlob('content');		
 	rs1.close();
-	fileName = fileName + currentMbo.getMboServer().getDate().toString() + '.' + 'fileType';
+	fileName = fileName + jobNumber + '.' + fileType;
 	print fileName
-	storeFileFromBlob (content,'C:',fileName);
 		
+	absoluteFilePath = outputFilePath + fileName
+	contentInBytes = content.getBytes(1,content.length()) ;
+	
+	storeFileFromBlob (contentInBytes, absoluteFilePath) ;
+						
 except	 Exception, e:
 	print "Error on report output to folder processing...."
 finally:
@@ -43,10 +61,3 @@ finally:
 	con.commit();	 
 	s.close();
 	con.close();
-	
-def storeFileFromBlob (blobContent, outputFilePath, outputFileName):
-	print 'Blob Content - ' + blobContent
-	print 'File Name - ' + outputFileName
-	fileGen = open(os.path.join(outputFilePath,outputFileName),'wb') ;
-	fileGen.write(blobContent.decode('base64')) ;
-	fileGen.close() ;
